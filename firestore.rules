@@ -1,0 +1,122 @@
+rules_version = '2';
+
+// =====================================================================
+// PORTAL AI — Firestore Security Rules
+//
+// The app's own data traffic flows through the Express backend using the
+// Firebase Admin SDK (bypasses these rules by design — trusted server).
+// These rules protect DIRECT client access (e.g. Firebase console apps,
+// future offline features): a user can only touch their own documents,
+// and admin-only collections are inaccessible from clients entirely.
+//
+// Deploy: firebase deploy --only firestore:rules
+// =====================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Admin is granted ONLY via server-set custom claims — a client
+    // cannot write claims, so this cannot be forged from the browser.
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    function isOwner(field) {
+      return isSignedIn() && resource.data[field] == request.auth.uid;
+    }
+
+    // ---------- users ----------
+    match /users/{uid} {
+      allow get: if isSelf(uid) || isAdmin();
+      allow list: if false; // listing all users is backend-only
+      allow create: if isSelf(uid)
+                    && request.resource.data.uid == uid
+                    && request.resource.data.role == 'user'; // role cannot be self-granted
+      allow update: if (isSelf(uid)
+                       && (!request.resource.data.diff(resource.data).affectedKeys()
+                            .hasAny(['role', 'plan', 'disabled'])))
+                    || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ---------- conversations ----------
+    match /conversations/{convId} {
+      allow read: if isOwner('uid') || isAdmin();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isOwner('uid') || isAdmin();
+    }
+
+    // ---------- messages ----------
+    match /messages/{msgId} {
+      allow read: if isOwner('uid') || isAdmin();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isOwner('uid') || isAdmin();
+    }
+
+    // ---------- subscriptions (read-only for the owner; server writes) ----------
+    match /subscriptions/{uid} {
+      allow get: if isSelf(uid) || isAdmin();
+      allow list: if false;
+      allow write: if false; // created/changed ONLY through the backend
+    }
+
+    // ---------- plans (public pricing, server writes) ----------
+    match /plans/{planId} {
+      allow get, list: if true;
+      allow write: if false; // admin edits go through the backend API
+    }
+
+    // ---------- invoices (owner read-only; server writes) ----------
+    match /invoices/{invoiceId} {
+      allow get, list: if isOwner('uid') || isAdmin();
+      allow create, update, delete: if false; // backend-only
+    }
+
+    // ---------- notifications ----------
+    match /notifications/{notifId} {
+      allow get: if (isSignedIn() && (resource.data.uid == request.auth.uid || resource.data.uid == null)) || isAdmin();
+      allow list: if isSignedIn();
+      allow create, update, delete: if false; // sent via admin backend API
+    }
+
+    // Per-user read marks for broadcast notifications
+    match /notificationReads/{markId} {
+      allow read: if isOwner('uid');
+      allow create, update: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isOwner('uid');
+    }
+
+    // ---------- usage (server-managed counters) ----------
+    match /usage/{usageId} {
+      allow get: if resource.data.uid == request.auth.uid || isAdmin();
+      allow list: if false;
+      allow write: if false; // quota accounting happens ONLY on the server
+    }
+
+    // ---------- images (gallery) ----------
+    match /images/{imageId} {
+      allow read: if isOwner('uid') || isAdmin();
+      allow create, update, delete: if false; // generated & stored via backend
+    }
+
+    // ---------- activity logs (append-only via backend) ----------
+    match /activityLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // ---------- default deny ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

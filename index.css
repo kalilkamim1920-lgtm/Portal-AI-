@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============ Base ============ */
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-portal-bg text-portal-text font-sans antialiased;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(139, 92, 246, 0.14), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 10%, rgba(59, 130, 246, 0.1), transparent),
+    radial-gradient(ellipse 50% 40% at 50% 110%, rgba(139, 92, 246, 0.08), transparent);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+[dir='rtl'] body {
+  letter-spacing: 0;
+}
+
+/* ============ Glassmorphism ============ */
+@layer components {
+  .glass {
+    @apply border border-white/10 bg-white/[0.045] backdrop-blur-xl;
+  }
+  .glass-strong {
+    @apply border border-white/[0.12] bg-white/[0.08] backdrop-blur-2xl;
+  }
+  .glass-card {
+    @apply glass rounded-2xl shadow-card transition-all duration-300;
+  }
+  .glass-card-hover {
+    @apply hover:border-portal-violet/40 hover:bg-white/[0.07] hover:shadow-glow-sm hover:-translate-y-0.5;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-portal-violet-light via-portal-violet to-portal-cyan bg-clip-text text-transparent;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold
+      transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-portal-violet/60
+      disabled:opacity-50 disabled:cursor-not-allowed select-none;
+    min-height: 44px;
+  }
+  .btn-primary {
+    @apply btn text-white shadow-glow-sm
+      bg-gradient-to-r from-portal-violet to-portal-blue
+      hover:shadow-glow hover:brightness-110 active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply btn border border-white/10 bg-white/[0.06] text-portal-text hover:bg-white/[0.1] active:scale-[0.98];
+  }
+  .btn-ghost {
+    @apply btn text-portal-muted hover:bg-white/[0.06] hover:text-portal-text;
+  }
+  .btn-danger {
+    @apply btn bg-red-500/15 text-red-300 border border-red-500/30 hover:bg-red-500/25;
+  }
+
+  .input-glass {
+    @apply w-full rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-portal-text
+      placeholder:text-portal-muted/60 outline-none transition-all duration-200
+      focus:border-portal-violet/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-portal-violet/25;
+    min-height: 44px;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium;
+  }
+
+  .section-title {
+    @apply text-2xl font-bold sm:text-3xl;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded-xl bg-white/[0.06];
+  }
+}
+
+/* ============ Scrollbars ============ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.35) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.35);
+  border-radius: 8px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.55);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ============ Markdown content (chat / tool output) ============ */
+.md-content {
+  @apply text-sm leading-7;
+}
+.md-content h1, .md-content h2, .md-content h3 {
+  @apply mb-2 mt-4 font-bold text-portal-text;
+}
+.md-content h1 { @apply text-xl; }
+.md-content h2 { @apply text-lg; }
+.md-content h3 { @apply text-base; }
+.md-content p { @apply mb-3 last:mb-0; }
+.md-content ul { @apply mb-3 list-disc space-y-1 ps-6; }
+.md-content ol { @apply mb-3 list-decimal space-y-1 ps-6; }
+.md-content a { @apply text-portal-cyan underline decoration-portal-cyan/40 hover:decoration-portal-cyan; }
+.md-content blockquote { @apply mb-3 border-s-2 border-portal-violet/50 bg-white/[0.03] py-1 pe-3 ps-4 text-portal-muted italic; }
+.md-content pre {
+  @apply mb-3 overflow-x-auto rounded-xl border border-white/10 bg-black/50 p-4 text-left;
+  direction: ltr;
+}
+.md-content code {
+  @apply rounded-md bg-white/[0.08] px-1.5 py-0.5 font-mono text-[0.85em] text-portal-cyan;
+}
+.md-content pre code {
+  @apply bg-transparent p-0 text-portal-text;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+.md-content table { @apply mb-3 w-full border-collapse text-sm; }
+.md-content th, .md-content td { @apply border border-white/10 px-3 py-2 text-start; }
+.md-content th { @apply bg-white/[0.05] font-semibold; }
+.md-content hr { @apply my-4 border-white/10; }
+
+/* ============ Typing indicator ============ */
+.typing-dot {
+  @apply inline-block h-2 w-2 rounded-full bg-portal-violet-light;
+  animation: typing-dot 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* ============ Safe area (iOS) ============ */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

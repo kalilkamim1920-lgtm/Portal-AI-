@@ -1,0 +1,56 @@
+{
+  "name": "portal-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PORTAL AI — Premium full-stack AI platform (React + Vite + Express + Firebase + Gemini)",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c magenta,cyan \"npm run dev:server\" \"npm run dev:web\"",
+    "dev:web": "vite",
+    "dev:server": "node --watch server/index.js",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "start": "node server/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:server": "vitest run server",
+    "test:web": "vitest run src tests",
+    "typecheck": "tsc --noEmit",
+    "emulators": "firebase emulators:start --only auth,firestore --import=./firebase/seed-data --export-on-exit=./firebase/seed-data",
+    "seed": "node server/scripts/seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "firebase": "^10.14.1",
+    "firebase-admin": "^12.6.0",
+    "lucide-react": "^0.454.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.1",
+    "react-router-dom": "^6.27.0",
+    "remark-gfm": "^4.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "autoprefixer": "^10.6.2",
+    "concurrently": "^9.1.0",
+    "firebase-tools": "^15.34.2",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.5.32",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
